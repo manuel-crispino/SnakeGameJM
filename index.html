@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <style>
+        #game-board {
+            position: relative;
+            margin-left: 30%;
+            margin-top: 5%;
+            height: 600px;
+            width: 600px;
+            border: 1px solid black;
+        }
+        .dot {
+           
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            background: #1eff12;
+        }
+        .apple {
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            background: #f00;
+        }
+    </style>
+</head>
+<body>
+  <h1 style="color: green;text-align: center;" >Snake Game </h1>
+
+    <div id="game-board"></div>
+    <script>
+        var dotSize = 20;
+        var direction = 'right';
+        var apple = null;
+        var dotInterval = null;
+        var dots = [{ top: 0, left: 0 }];
+
+        function createDot(top, left, id, color) {
+            var dot = document.createElement('div');
+            dot.classList.add(color);
+            dot.style.top = `${top}px`;
+            dot.style.left = `${left}px`;
+            dot.id = id;
+            return dot;
+        }
+
+        function updateGameBoard() {
+            var gameBoard = document.getElementById('game-board');
+            while (gameBoard.firstChild) {
+                gameBoard.firstChild.remove();
+            }
+            dots.forEach(function(dot, index) {
+                gameBoard.appendChild(createDot(dot.top, dot.left, index, 'dot'));
+            });
+            gameBoard.appendChild(createDot(apple.top, apple.left, 'apple', 'apple'));
+        }
+
+        function checkCollision() {
+            var head = dots[0];
+            if (head.left < 0 || head.top < 0 || head.left === 600 || head.top === 600) {
+                return true;
+            }
+            for (var i = 1; i < dots.length; i++) {
+                if (head.left === dots[i].left && head.top === dots[i].top) return true;
+            }
+            return false;
+        }
+
+        function randomApple() {
+    var left = Math.floor(Math.random() * 30) * dotSize;
+    var top = Math.floor(Math.random() * 30) * dotSize;
+    for (var i = 0; i < dots.length; i++) {
+        if (left === dots[i].left && top === dots[i].top) return randomApple();
+    }
+    return { top: top, left: left };
+}
+
+        function gameLoop() {
+            var newDot = { left: dots[0].left, top: dots[0].top };
+            
+            if (direction === 'left') newDot.left -= dotSize;
+            else if (direction === 'up') newDot.top -= dotSize;
+            else if (direction === 'right') newDot.left += dotSize;
+            else if (direction === 'down') newDot.top += dotSize;
+
+            
+           if (newDot.left === apple.left && newDot.top === apple.top) {
+                apple = randomApple();
+           } else {
+                dots.pop();
+           }
+
+           dots.unshift(newDot);
+
+           if (checkCollision()) {
+               clearInterval(dotInterval);
+               alert('Game Over!');
+           } else {
+               updateGameBoard();
+           }
+       }
+
+       window.onload = function() {
+           apple = randomApple();
+           dotInterval = setInterval(gameLoop, 200);
+       };
+
+       window.onkeydown = function(e) {
+           if (e.keyCode === 37 && direction !== 'right') direction = 'left';
+           else if (e.keyCode === 38 && direction !== 'down') direction = 'up';
+           else if (e.keyCode === 39 && direction !== 'left') direction = 'right';
+           else if (e.keyCode === 40 && direction !== 'up') direction = 'down';
+       };
+   </script>
+</body>
+</html>
